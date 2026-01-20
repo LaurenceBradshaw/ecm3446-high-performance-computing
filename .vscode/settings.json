@@ -1,0 +1,5 @@
+{
+    "editor.defaultFormatter": "zachflower.uncrustify",
+    "editor.formatOnSave": true,
+    "uncrustify.configPath": "uncrustify.cfg"
+}

@@ -1,0 +1,17 @@
+# Gnuplot script to plot vertical average data from a file
+
+set terminal png  enhanced 
+set output "vertical_average.png"
+
+set xlabel "x"
+set ylabel "average height"
+
+set grid
+set key off
+
+# Enforce an aspect ratio of 1
+set size square
+
+plot "vertical_average.dat" using 1:2 with lines lw 2
+
+# End of file

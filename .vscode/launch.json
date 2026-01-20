@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run advection2D",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/advection2D",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "build_advection2D"
+        }
+    ]
+}

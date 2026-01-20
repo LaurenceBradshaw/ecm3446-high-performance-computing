@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "WSL-C99-OpenMP",
+            "compilerPath": "/usr/bin/gcc",
+            "intelliSenseMode": "linux-gcc-x64",
+            "cStandard": "c99",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "compilerArgs": [
+                "-fopenmp"
+            ]
+        }
+    ],
+    "version": 4
+}

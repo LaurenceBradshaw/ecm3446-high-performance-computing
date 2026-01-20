@@ -53,3 +53,8 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+*.dat
+*.png
+*[0-9].c
+advection2D
