@@ -89,6 +89,7 @@ int main(){
 
     /* Calculate time step using the CFL condition */
     /* The fabs function gives the absolute value in case the velocity is -ve */
+    /* Task 3: Changes max possible velocity so this needs updating */
     float dt = CFL / ( ( fabs( equation_one( ymax ) ) / dx ) + ( fabs( vely ) / dy ) );
 
     /*** Report information about the calculation ***/
