@@ -20,8 +20,10 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <omp.h>
 #include <assert.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /*********************************************************************
                       Main function
@@ -93,6 +95,10 @@ int main(){
     float dt = CFL / ( ( fabs( equation_one( ymax ) ) / dx ) + ( fabs( vely ) / dy ) );
 
     /*** Report information about the calculation ***/
+    #ifdef _OPENMP
+    int num_threads = omp_get_max_threads();
+    printf( "Using %d threads\n", num_threads );
+    #endif
     printf( "Grid spacing dx     = %g\n", dx );
     printf( "Grid spacing dy     = %g\n", dy );
     printf( "CFL number          = %g\n", CFL );
@@ -104,10 +110,6 @@ int main(){
 
     /* Task 1: Parallelise the loops using OpenMP when acceptable and reasonable to do so */
     /* Leave a comment explaining why a loop could not be parallelised */
-
-    double start_time = 0.0;
-    double end_time   = 0.0;
-    start_time = omp_get_wtime();
 
     /*** Place x points in the middle of the cell ***/
     /* LOOP 1 */
@@ -127,7 +129,7 @@ int main(){
 
     /*** Set up Gaussian initial conditions ***/
     /* LOOP 3 */
-    #pragma omp parallel for collapse(2) private(x2,y2)
+    #pragma omp parallel for private(x2,y2)
     for( int i = 0; i < NX + 2; i++ )
     {
         for( int j = 0; j < NY + 2; j++ )
@@ -153,6 +155,13 @@ int main(){
     }
     fclose( initialfile );
 
+    /* Precompute velx profile to avoid recalculating it every time step since y[j] does not change per timestep*/
+    float velx_profile[NY + 2];
+    for( int j = 0; j < NY + 2; j++ )
+    {
+        velx_profile[j] = equation_one( y[j] );
+    }
+
     /*** Update solution by looping over time steps ***/
     /* LOOP 5 */
     /* Cannot parallelise this loop because each iteration depends on the results of the previous iteration */
@@ -171,7 +180,7 @@ int main(){
 
             /*** Apply boundary conditions at u[:][0] and u[:][NY+1] ***/
             /* LOOP 7 */
-            #pragma omp for nowait
+            #pragma omp for
             for( int i = 0; i < NX + 2; i++ )
             {
                 u[i][0]      = bval_lower;
@@ -182,16 +191,15 @@ int main(){
         /*** Calculate rate of change of u using leftward difference ***/
         /* Loop over points in the domain but not boundary values */
         /* LOOP 8 */
-        #pragma omp parallel for collapse(2)
+        #pragma omp parallel for
         for( int i = 1; i < NX + 1; i++ )
         {
+            #pragma omp simd
             for( int j = 1; j < NY + 1; j++ )
             {
                 /* Task 3: replace velx with velx as calculated from Equation (1) */
-                float velx_calc = equation_one( y[j] );
-
                 /* Equation (2), (3) and (4) */
-                dudt[i][j] = -velx_calc * ( u[i][j] - u[i - 1][j] ) / dx
+                dudt[i][j] = -velx_profile[j] * ( u[i][j] - u[i - 1][j] ) / dx
                     - vely * ( u[i][j] - u[i][j - 1] ) / dy;
             }
         }
@@ -199,9 +207,10 @@ int main(){
         /*** Update u from t to t+dt ***/
         /* Loop over points in the domain but not boundary values */
         /* LOOP 9 */
-        #pragma omp parallel for collapse(2)
+        #pragma omp parallel for
         for( int i = 1; i < NX + 1; i++ )
         {
+            #pragma omp simd
             for( int j = 1; j < NY + 1; j++ )
             {
                 /* Equation (5) */
@@ -209,9 +218,6 @@ int main(){
             }
         }
     } // time loop
-
-    end_time = omp_get_wtime();
-    printf( "Elapsed time: %g seconds\n", end_time - start_time );
 
     /*** Write array of final u values out to file ***/
     FILE *finalfile;
