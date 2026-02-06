@@ -29,7 +29,8 @@
                       Main function
  **********************************************************************/
 
-float equation_one( float y ) {
+float equation_one( float y ) 
+{
     const float friction_vel = 0.2;
     const float z0           = 1.0;
     const float k            = 0.41; // von Karman constant
@@ -44,8 +45,8 @@ float equation_one( float y ) {
     }
 }
 
-int main(){
-
+int main()
+{
     /* Grid properties */
     const int   NX   = 1000; // Number of x points
     const int   NY   = 1000; // Number of y points
